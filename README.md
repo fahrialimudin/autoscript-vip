@@ -1,6 +1,6 @@
 # 🚀 SCRIPT AUTO INSTALL SSH & XRAY MULTIPORT
 
-**Base Script by:** saliminwaskinahzzxxcc  
+**Base Script by:** Arya Blitar  
 **Modified by:** Fahri Alimudin
 
 ---
@@ -111,7 +111,7 @@ Jika ada pertanyaan atau butuh bantuan, hubungi saya di:
 
 ## 🙏 PENUTUP & KREDIT
 
-Terima kasih banyak kepada **saliminwaskinahzzxxcc** atas script dasarnya yang luar biasa sehingga saya bisa melakukan modifikasi ini.
+Terima kasih banyak kepada **ARYA BLITAR** atas script dasarnya yang luar biasa sehingga saya bisa melakukan modifikasi ini.
 
 Gunakan script ini dengan bijak. Dilarang keras untuk diperjualbelikan karena script ini didapatkan secara gratis.
 
