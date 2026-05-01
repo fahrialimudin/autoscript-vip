@@ -1,0 +1,91 @@
+#!/bin/bash
+
+yellow="\033[0;33m"
+ungu="\033[0;35m"
+Red="\033[91;1m"
+Cyan="\033[96;1m"
+Xark="\033[0m"
+BlueCyan="\033[5;36m"
+WhiteBe="\033[5;37m"
+GreenBe="\033[5;32m"
+YellowBe="\033[5;33m"
+BlueBe="\033[5;34m"
+# . Liner 
+
+clear
+
+function Daftar_Account() {
+grep -E "^### " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
+}
+
+function change_vmess_quota() {
+
+echo ""
+read -p " Input Username        :   " user
+  quota_file="/etc/vmess/${user}"
+
+  # Validasi apakah file kuota sudah ada
+  if [ -e "$quota_file" ]; then
+    current_quota=$(cat "$quota_file")
+echo ""
+echo ""
+
+echo -e "${Cyan} BEFORE QUOTA ${Xark} "
+echo -e ""  
+echo -e "${GreenBe} Quota      : $((current_quota / 1024 / 1024 / 1024)) ${Xark} "
+echo -e "${GreenBe} Username   : $user ${Xark} "
+echo -e ""
+
+echo ""
+read -p " Input New Quota (gb) : " new_quota
+
+    # Validasi jika masukan kosong atau tidak valid
+    if [[ -z "$new_quota" || ! "$new_quota" =~ ^[0-9]+$ ]]; then
+      echo "Masukan tidak valid. Kuota tidak berubah."
+    else
+
+      # Konversi kuota ke byte
+      new_quota_bytes=$((new_quota * 1024 * 1024 * 1024))
+      echo "${new_quota_bytes}" > "${quota_file}"
+
+
+echo -e "${GreenBe} Succesfully ${Xark} "
+echo ""
+echo -e "${Cyan} AFTER ${Xark} "
+echo ""
+      echo -e "${yellow} New Quota   : $new_quota GB ${Xark} "
+      echo -e "${yellow} Username    : $user ${Xark}"
+echo ""
+
+
+      # Hapus entri lama dan tambahkan yang baru ke dalam database
+      DATADB=$(cat /etc/vmess/.vmess.db | grep "^###" | grep -w "${user}" | awk '{print $2}')
+      if [[ "${DATADB}" != '' ]]; then
+        sed -i "/\b${user}\b/d" /etc/vmess/.vmess.db
+      fi
+      echo "### ${user} ${exp} ${uuid} ${new_quota_bytes} ${iplimit}" >>/etc/vmess/.vmess.db
+      
+
+      echo "  Database Update Succes  "
+
+
+    fi
+  else
+
+echo ""
+       echo -e " File kuota is Wrong Username :  $user  "
+echo ""
+
+  fi
+}
+
+# Panggil fungsi untuk mengganti kuota VMess
+asu
+
+echo ""
+echo -e ""
+echo -e " Script by Fahri Alimudin 082328013583       "
+echo ""
+read -n 1 -s -r -p "Press any key to back on menu"
+
+menu

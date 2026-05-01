@@ -1,0 +1,161 @@
+#!/bin/bash
+export DEBIAN_FRONTEND=noninteractive
+set +e
+
+OS="$(uname -m)"
+MYIP="$(wget -qO- ipinfo.io/ip 2>/dev/null || curl -fsSL ipinfo.io/ip 2>/dev/null)"
+domain="$(cat /root/domain 2>/dev/null || cat /etc/xray/domain 2>/dev/null || hostname -f)"
+NET="$(ip -4 route ls | awk '/default/ {print $5; exit}')"
+REPO="${REPO:-https://raw.githubusercontent.com/fahrialimudin/autoscript-vip/main/}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+fetch_file() {
+    local rel="$1"
+    local dst="$2"
+    mkdir -p "$(dirname "$dst")"
+    if [ -f "${SCRIPT_DIR}/${rel#media/}" ]; then
+        cp -f "${SCRIPT_DIR}/${rel#media/}" "$dst"
+    elif [ -f "${SCRIPT_DIR}/../${rel}" ]; then
+        cp -f "${SCRIPT_DIR}/../${rel}" "$dst"
+    else
+        wget -q -O "$dst" "${REPO}${rel}" || curl -fsSL "${REPO}${rel}" -o "$dst"
+    fi
+}
+
+ovpn_install() {
+    apt-get update -y >/dev/null 2>&1 || true
+    apt-get install -y openvpn easy-rsa iptables iptables-persistent netfilter-persistent unzip curl wget >/dev/null 2>&1 || true
+    rm -rf /etc/openvpn
+    mkdir -p /etc/openvpn
+    fetch_file "media/vpn.zip" "/etc/openvpn/vpn.zip"
+    unzip -o -d /etc/openvpn/ /etc/openvpn/vpn.zip >/dev/null 2>&1
+    rm -f /etc/openvpn/vpn.zip
+    chown -R root:root /etc/openvpn/server/easy-rsa/ 2>/dev/null || true
+}
+
+patch_server_config() {
+    for conf in /etc/openvpn/server/server-tcp.conf /etc/openvpn/server/server-udp.conf; do
+        [ -f "$conf" ] || continue
+        grep -q '^topology subnet' "$conf" || echo 'topology subnet' >> "$conf"
+        grep -q '^allow-compression yes' "$conf" || echo 'allow-compression yes' >> "$conf"
+        grep -q '^push "dhcp-option DNS 1.1.1.1"' "$conf" || echo 'push "dhcp-option DNS 1.1.1.1"' >> "$conf"
+    done
+}
+
+config_easy() {
+    mkdir -p /usr/lib/openvpn/
+    if [ -f /usr/lib/x86_64-linux-gnu/openvpn/plugins/openvpn-plugin-auth-pam.so ]; then
+        cp -f /usr/lib/x86_64-linux-gnu/openvpn/plugins/openvpn-plugin-auth-pam.so /usr/lib/openvpn/openvpn-plugin-auth-pam.so
+    fi
+    if [ -f /etc/default/openvpn ]; then
+        sed -i 's/#AUTOSTART="all"/AUTOSTART="all"/g' /etc/default/openvpn
+    fi
+    modprobe tun >/dev/null 2>&1 || true
+    systemctl daemon-reload >/dev/null 2>&1 || true
+    systemctl enable --now openvpn-server@server-tcp.service >/dev/null 2>&1 || true
+    systemctl enable --now openvpn-server@server-udp.service >/dev/null 2>&1 || true
+}
+
+make_firewall() {
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+    grep -q '^net.ipv4.ip_forward=1' /etc/sysctl.conf || echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+    sysctl -w net.ipv4.ip_forward=1 >/dev/null 2>&1 || true
+    if [ -n "$NET" ]; then
+        iptables -t nat -C POSTROUTING -s 10.6.0.0/24 -o "$NET" -j MASQUERADE 2>/dev/null || iptables -t nat -A POSTROUTING -s 10.6.0.0/24 -o "$NET" -j MASQUERADE
+        iptables -t nat -C POSTROUTING -s 10.7.0.0/24 -o "$NET" -j MASQUERADE 2>/dev/null || iptables -t nat -A POSTROUTING -s 10.7.0.0/24 -o "$NET" -j MASQUERADE
+    fi
+    iptables -C INPUT -p tcp --dport 1194 -j ACCEPT 2>/dev/null || iptables -I INPUT -p tcp --dport 1194 -j ACCEPT
+    iptables -C INPUT -p udp --dport 2200 -j ACCEPT 2>/dev/null || iptables -I INPUT -p udp --dport 2200 -j ACCEPT
+    netfilter-persistent save >/dev/null 2>&1 || true
+    systemctl enable --now netfilter-persistent >/dev/null 2>&1 || true
+}
+
+make_client_configs() {
+    local host="${domain:-$MYIP}"
+    cat > /etc/openvpn/tcp.ovpn <<END
+client
+dev tun
+proto tcp
+remote ${host} 1194
+resolv-retry infinite
+route-method exe
+nobind
+persist-key
+persist-tun
+auth-user-pass
+allow-compression yes
+comp-lzo
+verb 3
+END
+
+    cat > /etc/openvpn/udp.ovpn <<END
+client
+dev tun
+proto udp
+remote ${host} 2200
+resolv-retry infinite
+route-method exe
+nobind
+persist-key
+persist-tun
+auth-user-pass
+allow-compression yes
+comp-lzo
+verb 3
+END
+
+    cat > /etc/openvpn/ws-ssl.ovpn <<END
+client
+dev tun
+proto tcp
+remote ${host} 443
+resolv-retry infinite
+route-method exe
+nobind
+persist-key
+persist-tun
+auth-user-pass
+allow-compression yes
+comp-lzo
+verb 3
+END
+
+    cp -f /etc/openvpn/ws-ssl.ovpn /etc/openvpn/ssl.ovpn
+}
+
+cert_ovpn() {
+    for name in tcp udp ws-ssl ssl; do
+        echo '<ca>' >> "/etc/openvpn/${name}.ovpn"
+        cat /etc/openvpn/server/ca.crt >> "/etc/openvpn/${name}.ovpn"
+        echo '</ca>' >> "/etc/openvpn/${name}.ovpn"
+        cp -f "/etc/openvpn/${name}.ovpn" "/var/www/html/${name}.ovpn"
+    done
+
+    cd /var/www/html/ || exit 0
+    zip -q Kyt-Project.zip tcp.ovpn udp.ovpn ssl.ovpn ws-ssl.ovpn >/dev/null 2>&1 || true
+    cat <<'mySiteOvpn' > /var/www/html/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8" /><title>OVPN Config Download</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{font-family:Arial;background:#101010;color:#fff}.box{max-width:680px;margin:50px auto;padding:24px;border:1px solid #555;border-radius:12px}a{color:#00d1ff}</style></head>
+<body><div class="box"><h2>OpenVPN Config Download</h2><ul>
+<li><a href="https://IP-ADDRESSS:81/tcp.ovpn">TCP 1194</a></li>
+<li><a href="https://IP-ADDRESSS:81/udp.ovpn">UDP 2200</a></li>
+<li><a href="https://IP-ADDRESSS:81/ssl.ovpn">SSL 443</a></li>
+<li><a href="https://IP-ADDRESSS:81/ws-ssl.ovpn">WS SSL 443</a></li>
+<li><a href="https://IP-ADDRESSS:81/Kyt-Project.zip">ALL ZIP</a></li>
+</ul></div></body></html>
+mySiteOvpn
+    sed -i "s|IP-ADDRESSS|${domain:-$MYIP}|g" /var/www/html/index.html
+}
+
+install_ovpn() {
+    ovpn_install
+    patch_server_config
+    config_easy
+    make_firewall
+    make_client_configs
+    cert_ovpn
+    systemctl restart openvpn-server@server-tcp.service openvpn-server@server-udp.service >/dev/null 2>&1 || true
+}
+
+install_ovpn

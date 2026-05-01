@@ -1,0 +1,220 @@
+#!/bin/bash
+
+NC='\033[0;37m' 
+PURPLE='\033[0;34m' 
+GREEN='\033[0;32m' 
+RED='\033[0;31m'
+BIWhite='\033[1;97m'  
+red() { echo -e "\\033[31;1m${*}\\033[0m"; }
+
+clear
+clear
+
+function userws(){
+clear
+NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/config.json")
+        if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
+    echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e " \e[1;97;101m         CONFIG VMESS ACCOUNT           \e[0m"
+    echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo ""
+    echo "You have no existing clients!"
+    echo ""
+    echo -e "\033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    read -n 1 -s -r -p "Press [ Enter ] to back on menu vmess"
+    vmess
+fi
+
+  echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+  echo -e "  \e[1;97;101m        CONFIG VMESS ACCOUNT         \E[0m"
+  echo -e "\033[1;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo "     No  Expired   User"
+        grep -E "^### " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | nl -s ') '
+        until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]]; do
+                if [[ ${CLIENT_NUMBER} == '1' ]]; then
+                        read -rp "Select one client [1]: " CLIENT_NUMBER
+                else
+                        read -rp "Select one client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER
+                fi
+        done
+user=$(grep -E "^### " "/etc/xray/config.json" | cut -d ' ' -f 2 | sed -n "${CLIENT_NUMBER}"p)
+domain=$(cat /etc/xray/domain)
+iplim=$(cat /etc/kyt/limit/vmess/ip/$user)
+Quota=$(cat /etc/vmess/$user)
+uuid=$(grep -E "^### " "/etc/vmess/.vmess.db" | cut -d ' ' -f 4 | sed -n "${CLIENT_NUMBER}"p)
+#Quota=$(grep -E "^### " "/etc/xray/config.json" | cut -d ' ' -f 5 | sed -n "${CLIENT_NUMBER}"p)
+exp=$(grep -E "^### " "/etc/xray/config.json" | cut -d ' ' -f 3 | sed -n "${CLIENT_NUMBER}"p)
+hariini=`date -d "0 days" +"%Y-%m-%d"`
+asu=`cat<<EOF
+      {
+      "v": "2",
+      "ps": "${user}",
+      "add": "bug.com",
+      "port": "443",
+      "id": "${uuid}",
+      "aid": "0",
+      "net": "ws",
+      "path": "/vmess",
+      "type": "none",
+      "host": "${domain}",
+      "tls": "tls"
+}
+EOF`
+ask=`cat<<EOF
+      {
+      "v": "2",
+      "ps": "${user}",
+      "add": "bug.com",
+      "port": "80",
+      "id": "${uuid}",
+      "aid": "0",
+      "net": "ws",
+      "path": "/vmess",
+      "type": "none",
+      "host": "${domain}",
+      "tls": "none"
+}
+EOF`
+grpc=`cat<<EOF
+      {
+      "v": "2",
+      "ps": "${user}",
+      "add": "${domain}",
+      "port": "443",
+      "id": "${uuid}",
+      "aid": "0",
+      "net": "grpc",
+      "path": "vmess-grpc",
+      "type": "none",
+      "host": "bug.com",
+      "tls": "tls"
+}
+EOF`
+
+vmesslink1="vmess://$(echo $asu | base64 -w 0)"
+vmesslink2="vmess://$(echo $ask | base64 -w 0)"
+vmesslink3="vmess://$(echo $grpc | base64 -w 0)"
+
+clear
+echo -e ""
+echo -e "\033[0;34m◇━━━━━━━━━━━━━━━━━◇\033[0m"
+echo -e " Xray/Vmess Account "
+echo -e "\033[0;34m◇━━━━━━━━━━━━━━━━━◇\033[0m"
+echo -e "Remarks          : ${user}"
+#echo -e "Domain           : ${domain}"
+#echo -e "User Quota       : ${Quota} GB"
+#echo -e "User Ip          : ${iplimit} IP"
+echo -e "Port TLS         : 443, 8443, 2087, 2096"
+echo -e "Port none TLS    : 80, 8080, 8880, 2082"
+echo -e "id               : ${uuid}"
+#echo -e "Xray Dns         : ${NS}"
+#echo -e "Pubkey           : ${PUB}"
+echo -e "alterId          : 0"
+echo -e "Security         : auto"
+echo -e "Network          : ws"
+echo -e "Path             : /vmess"
+#echo -e "Dynamic          : https://bugmu.com/path"
+echo -e "ServiceName      : vmess-grpc"
+#echo -e "Host XrayDNS : ${NS}"
+#echo -e "Location         : $CITY"
+#echo -e "Pub Key          : ${PUB}"
+echo -e "\033[0;34m◇━━━━━━━━━━━━━━━━━◇\033[0m"
+echo -e "Link TLS         : ${vmesslink1}"
+echo -e "\033[0;34m◇━━━━━━━━━━━━━━━━━◇\033[0m"
+echo -e "Link none TLS    : ${vmesslink2}"
+echo -e "\033[0;34m◇━━━━━━━━━━━━━━━━━◇\033[0m"
+echo -e "Link GRPC        : ${vmesslink3}"
+echo -e "\033[0;34m◇━━━━━━━━━━━━━━━━━◇\033[0m"
+#echo -e "Format OpenClash : https://${domain}:81/vmess-$user.txt"
+#echo -e "\033[0;34m◇━━━━━━━━━━━━━━━━━◇\033[0m"
+#echo -e "Aktif Selama     : $masaaktif Hari"
+#echo -e "Dibuat Pada      : $tnggl"
+echo -e "Berakhir Pada    : $exp"
+#echo -e "\033[0;34m◇━━━━━━━━━━━━━━━━━◇\033[0m"
+echo -e " "
+echo -e "\033[0;32m Fahri Alimudin 082328013583 ${NC}"
+echo ""
+read -n 1 -s -r -p "Press any key to back on menu"
+menu
+}
+
+function editlimit(){
+clear
+NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/vmess/.vmess.db")
+        if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
+                clear
+        echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo -e "         Edit Limit Vmess          \E[0m"
+        echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+                echo ""
+                echo "You have no existing clients!"
+                echo ""
+                echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo ""
+        read -n 1 -s -r -p "Press any key to back on menu"
+        menu
+        fi
+
+        clear
+        echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "         Edit Limit Vmess          \E[0m"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo ""
+        grep -E "^### " "/etc/vmess/.vmess.db" | cut -d ' ' -f 2 | column -t | sort | uniq
+    echo ""
+    red "tap enter to go back"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        read -rp "Input Username : " user
+    if [ -z $user ]; then
+    menu
+    else
+    read -p "Limit (IP): " ips
+    echo -e "${ips}" > /etc/vmess/limit-ip/${user}
+    clear
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo " VMESS Account Was Successfully Edit"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo ""
+    echo " Client Name     : $user"
+    echo " Limit IP Sukses : $ips IP"
+    echo ""
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo ""
+    read -n 1 -s -r -p "Press any key to back on menu"
+    menu
+    fi
+    
+}
+clear
+echo -e "${PURPLE}┌─────────────────────────────────────────────────┐${NC}"
+echo -e "${PURPLE}│\e[1;97;101m                   VMESS MENU                    ${PURPLE}│$NC"
+echo -e "${PURPLE}└─────────────────────────────────────────────────┘${NC}"
+echo -e "${PURPLE}┌─────────────────────────────────────────────────┐${NC}"
+echo -e "     ${PURPLE}[${BIWhite}1${PURPLE}]${NC} Create Vmess Account     "
+echo -e "     ${PURPLE}[${BIWhite}2${PURPLE}]${NC} Trial Vmess Account     "
+echo -e "     ${PURPLE}[${BIWhite}3${PURPLE}]${NC} Delete Account Vmess     "
+echo -e "     ${PURPLE}[${BIWhite}4${PURPLE}]${NC} Renew Account Vmess     "
+echo -e "     ${PURPLE}[${BIWhite}5${PURPLE}]${NC} Cek User Login Vmess     "
+echo -e "     ${PURPLE}[${BIWhite}6${PURPLE}]${NC} Cek User Vmess     "
+echo -e "     ${PURPLE}[${BIWhite}7${PURPLE}]${NC} Change Limit Bw User Vmess     "
+echo -e "     ${PURPLE}[${BIWhite}8${PURPLE}]${NC} Change Limit Ip User Vmess     "
+echo -e "     ${PURPLE}[${BIWhite}0${PURPLE}]${NC} Back To Menu     "
+echo -e ""
+echo -e "     \e[1;97;101m✶ Install by Fahri Alimudin 082328013583 082328013583 ✶ ${PURPLE} "
+echo -e "${PURPLE}└──────────────────────────────────────────────────┘${NC}"
+echo ""
+read -p " Select menu : " opt
+echo -e ""
+case $opt in
+1) clear ; addws ;;
+2) clear ; trialws ;;
+3) clear ; delws ;;
+4) clear ; renewws;;
+5) clear ; cekws ;;
+6) clear ; userws ;;
+7) clear ; asu ;;
+8) clear ; editlimit ;;
+0) clear ; menu ;;
+x) exit ;;
+*) echo -e "" ; echo " Klik Enter Balik Menu" ; sleep 1 ; menu ;;
+esac

@@ -1,0 +1,34 @@
+#!/bin/bash
+set -euo pipefail
+REPOS="https://raw.githubusercontent.com/fahrialimudin/autoscript-vip/main/"
+DOMAIN_PATH=$(cat /etc/xray/domain 2>/dev/null || true)
+if [[ -z "$DOMAIN_PATH" ]]; then
+    echo "Domain belum tersedia di /etc/xray/domain"
+    exit 1
+fi
+NS_DOMAIN="dns.${DOMAIN_PATH}"
+echo "$NS_DOMAIN" >/etc/xray/dns
+
+TMPDIR=$(mktemp -d)
+cleanup() { rm -rf "$TMPDIR"; }
+trap cleanup EXIT
+mkdir -p /etc/slowdns
+cd "$TMPDIR"
+
+wget -q -O dnstt-server "${REPOS}slowdns/dnstt-server"
+wget -q -O dnstt-client "${REPOS}slowdns/dnstt-client"
+chmod +x dnstt-server dnstt-client
+./dnstt-server -gen-key -privkey-file server.key -pubkey-file server.pub
+install -m 755 dnstt-server /etc/slowdns/dnstt-server
+install -m 755 dnstt-client /etc/slowdns/dnstt-client
+install -m 600 server.key /etc/slowdns/server.key
+install -m 644 server.pub /etc/slowdns/server.pub
+
+wget -q -O /etc/systemd/system/client.service "${REPOS}slowdns/client"
+wget -q -O /etc/systemd/system/server.service "${REPOS}slowdns/server"
+sed -i "s/xxxx/${NS_DOMAIN}/g" /etc/systemd/system/client.service /etc/systemd/system/server.service
+systemctl daemon-reload
+systemctl enable --now server.service client.service || true
+
+echo "SlowDNS NS: $NS_DOMAIN"
+echo "Tambahkan NS record dns.${DOMAIN_PATH} di panel DNS Anda jika ingin memakai SlowDNS."

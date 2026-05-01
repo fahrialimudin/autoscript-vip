@@ -1,0 +1,130 @@
+#!/bin/bash
+# Service information panel - Ubuntu 22.04/24.04 safe status checker
+DF='\e[39m'
+Bold='\e[1m'
+Blink='\e[5m'
+yell='\e[33m'
+RED='\033[0;31m'
+green='\e[32m'
+PURPLE='\e[35m'
+cyan='\e[36m'
+LRED='\e[91m'
+Lgreen='\e[92m'
+Lyellow='\e[93m'
+NC='\e[0m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+LIGHT='\033[0;37m'
+grenbo="\e[92;1m"
+hijau="\033[92m"
+Blue="\033[36m"
+blue="\033[36m"
+yellow="\033[33m"
+clear
+
+on="${GREEN}[ON]${NC}${hijau} │${NC}"
+off="${RED}[OFF]${NC} "
+
+is_active() { systemctl is-active --quiet "$1" 2>/dev/null; }
+is_enabled_or_active() { systemctl is-active --quiet "$1" 2>/dev/null || systemctl is-enabled --quiet "$1" 2>/dev/null; }
+status_unit() { if is_active "$1"; then echo -e "$on"; else echo -e "$off"; fi; }
+
+status_any() {
+    for svc in "$@"; do
+        if is_active "$svc"; then echo -e "$on"; return; fi
+    done
+    echo -e "$off"
+}
+
+status_file_and_unit() {
+    local file="$1"; shift
+    if [ -s "$file" ]; then
+        for svc in "$@"; do is_active "$svc" && echo -e "$on" && return; done
+    fi
+    echo -e "$off"
+}
+
+# // System Information
+domain=$(cat /etc/xray/domain 2>/dev/null || echo '-')
+IPVPS=$(curl -s ipv4.icanhazip.com 2>/dev/null || hostname -I | awk '{print $1}')
+export IP=$( curl -s https://ipinfo.io/ip/ 2>/dev/null || echo "$IPVPS" )
+
+status_ssh=$(status_any ssh sshd)
+status_udp=$(status_unit udp-custom)
+status_openvpn=$(status_any openvpn-server@server-tcp openvpn-server@server-udp openvpn)
+status_ws_epro=$(status_unit ws)
+status_udp1=$(status_unit udp-mini-1)
+status_udp2=$(status_unit udp-mini-2)
+status_udp3=$(status_unit udp-mini-3)
+status_beruangjatuh=$(status_unit dropbear)
+status_haproxy=$(status_unit haproxy)
+status_cron=$(status_unit cron)
+status_nginx=$(status_unit nginx)
+status_ss=$(status_unit xray)
+noobz=$(status_unit noobzvpns)
+
+if is_enabled_or_active netfilter-persistent; then status_galo="$on"; else status_galo="$off"; fi
+if is_enabled_or_active rc-local || [ -x /etc/rc.local ]; then status_galoo="$on"; else status_galoo="$off"; fi
+if [ -s /etc/cron.d/daily_reboot ] && is_active cron; then status_galooo="$on"; else status_galooo="$off"; fi
+
+# OHP di paket ini tidak memiliki unit systemd terpisah. Status mengikuti HAProxy + backend terkait.
+status_ohp_ssh="$status_ws_epro"
+status_ohp_dropbear="$status_beruangjatuh"
+status_ohp_openvpn="$status_openvpn"
+
+clear
+echo -e " ${hijau}┌────────────────────────────────────────────┐${NC}"
+echo -e " ${hijau}│$NC$NC\033[41m              System Information            $NC${hijau}│$NC"
+echo -e " ${hijau}└────────────────────────────────────────────┘${NC}"
+echo -e " ${hijau}┌────────────────────────────────────────────┐${NC}"
+echo -e " ${hijau}│$NC Operating System$NC  $blue=$NC$yellow $(grep -w PRETTY_NAME /etc/os-release | head -n1 | sed 's/=//g;s/\"//g;s/PRETTY_NAME//g')$NC"
+echo -e " ${hijau}│$NC IP Server$NC         $blue=$NC$yellow $IPVPS$NC"
+echo -e " ${hijau}│$NC Domain$NC            $blue=$NC$yellow $domain$NC"
+echo -e " ${hijau}└────────────────────────────────────────────┘${NC}"
+echo -e " ${hijau}┌────────────────────────────────────────────┐${NC}"
+echo -e " ${hijau}│$NC$NC\033[41m              Service Information           $NC${hijau}│$NC"
+echo -e " ${hijau}└────────────────────────────────────────────┘${NC}"
+echo -e " ${hijau}┌────────────────────────────────────────────┐${NC}"
+echo -e " ${hijau}│ ${hijau}Service SSH / TUN                 $blue=$NC $status_ssh"
+echo -e " ${hijau}│ ${hijau}Service SSH UDP                   $blue=$NC $status_udp"
+echo -e " ${hijau}│ ${hijau}Service OpenVPN SSL               $blue=$NC $status_openvpn"
+echo -e " ${hijau}│ ${hijau}Service OpenVPN WS-SSL            $blue=$NC $status_openvpn"
+echo -e " ${hijau}│ ${hijau}Service OpenVPN UDP               $blue=$NC $status_openvpn"
+echo -e " ${hijau}│ ${hijau}Service OpenVPN TCP               $blue=$NC $status_openvpn"
+echo -e " ${hijau}│ ${hijau}Service OHP SSH                   $blue=$NC $status_ohp_ssh"
+echo -e " ${hijau}│ ${hijau}Service OHP Dropbear              $blue=$NC $status_ohp_dropbear"
+echo -e " ${hijau}│ ${hijau}Service OHP OpenVPN               $blue=$NC $status_ohp_openvpn"
+echo -e " ${hijau}│ ${hijau}Service WS ePRO                   $blue=$NC $status_ws_epro"
+echo -e " ${hijau}│ ${hijau}Service BadVPN 7100               $blue=$NC $status_udp1"
+echo -e " ${hijau}│ ${hijau}Service BadVPN 7200               $blue=$NC $status_udp2"
+echo -e " ${hijau}│ ${hijau}Service BadVPN 7300               $blue=$NC $status_udp3"
+echo -e " ${hijau}│ ${hijau}Service Dropbear                  $blue=$NC $status_beruangjatuh"
+echo -e " ${hijau}│ ${hijau}Service Haproxy                   $blue=$NC $status_haproxy"
+echo -e " ${hijau}│ ${hijau}Service Crons                     $blue=$NC $status_cron"
+echo -e " ${hijau}│ ${hijau}Service Nginx Webserver           $blue=$NC $status_nginx"
+echo -e " ${hijau}│ ${hijau}Service Xray Vmess WS TLS         $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Xray Vmess WS Non TLS     $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Xray Vmess gRPC           $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Xray Vless WS TLS         $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Xray Vless WS Non TLS     $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Xray Vless gRPC           $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Xray Trojan WS            $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Xray Trojan Non WS        $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Xray Trojan gRPC          $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Xray Shadowsocks WS       $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Xray Shadowsocks Non WS   $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Xray Shadowsocks gRPC     $blue=$NC $status_ss"
+echo -e " ${hijau}│ ${hijau}Service Akun NoobzVpn             $blue=$NC $noobz"
+echo -e " ${hijau}│ ${hijau}Service Iptables                  $blue=$NC $status_galo"
+echo -e " ${hijau}│ ${hijau}Service RClocal                   $blue=$NC $status_galoo"
+echo -e " ${hijau}│ ${hijau}Service Autoreboot                $blue=$NC $status_galooo"
+echo -e " ${hijau}└────────────────────────────────────────────┘${NC}"
+echo -e " ${hijau}┌────────────────────────────────────────────┐${NC}"
+echo -e " ${hijau}│$NC$NC\033[41m             CONTACT SUPPORT / CS           $NC${hijau}│$NC"
+echo -e " ${hijau}└────────────────────────────────────────────┘${NC}"
+echo -e " ${hijau}│$NC SUPPORT             $blue= ${NC} ST FAHRI ALIMUDIN 082328013583 ${NC}  "
+echo -e " ${hijau}│$NC WHATSAPP            $blue= ${NC} 082328013583 ${NC}  "
+echo -e " ${hijau}└────────────────────────────────────────────┘${NC}"
+echo ""
+read -n 1 -s -r -p "Press any key to back on menu"
+menu

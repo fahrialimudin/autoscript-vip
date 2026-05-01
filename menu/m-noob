@@ -1,0 +1,252 @@
+#!/bin/bash
+# // Exporting Language to UTF-8
+export LC_ALL='en_US.UTF-8'
+export LANG='en_US.UTF-8'
+export LANGUAGE='en_US.UTF-8'
+export LC_CTYPE='en_US.utf8'
+
+# // Export Color & Information
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export YELLOW='\033[0;33m'
+export BLUE='\033[0;34m'
+export PURPLE='\033[0;35m'
+export CY='\033[0;36m'
+export LIGHT='\033[0;37m'
+export NC='\033[0m'
+
+# // Export Banner Status Information
+export EROR="[${RED} EROR ${NC}]"
+export INFO="[${YELLOW} INFO ${NC}]"
+export OKEY="[${GREEN} OKEY ${NC}]"
+export PENDING="[${YELLOW} PENDING ${NC}]"
+export SEND="[${YELLOW} SEND ${NC}]"
+export RECEIVE="[${YELLOW} RECEIVE ${NC}]"
+
+# // Export Align
+export BOLD="\e[1m"
+export WARNING="${RED}\e[5m"
+export UNDERLINE="\e[4m"
+
+# // Exporting URL Host
+export Server_URL="autosc.me/aio"
+export Server_Port="443"
+export Server_IP="underfined"
+export Script_Mode="Stable"
+export Auther="XdrgVPN"
+
+function garis() {
+echo -e "${CY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+}
+
+function create(){
+clear
+
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S CREATE°         \E[0m|"
+garis
+read -p "Username: " user
+read -p "Password: " pass
+read -p "Expired : " exp
+
+noobzvpns --add-user $user $pass --expired-user $user $exp
+
+
+clear
+
+garis
+echo -e "${CY}| \E[44;1;39m      °NOOBZVPN'S ACCOUNT°        \E[0m|"
+garis
+echo ""
+echo -e "DOMAIN : $( cat /etc/xray/domain )"
+echo -e "USERNAME: $user"
+echo -e "PASSWORD: $pass"
+echo -e "IP LIMIT: $ip"
+echo -e "EXP DAYS: $exp DAYS"
+echo -e "tcp_std port:  2082,8080"
+echo -e "tcp_ssl port: 8443"
+garis
+echo -e "Example config TCP_STD 8080"
+garis
+echo ""
+echo -e "EJrIfen5qGdVYT5k7bQgnZQPpd5vVPkchArH8YQlK0rceZ7rgssiVPWGid2nI5mWEBaCBAUXmCO9lqIlEkGWQEy6jqWc4fKhtS5aWomNVX1/Hgd8p0fzQe2aTtMY6Md/J4hd9ssK7VZLpcPL74i5zkFeBGX+iUuT3Zgexuje5LUdkWzusa/sHgU3kPnbAZIEWO26ghc7GVjxJGbJKcDRnf2ufhV5iHkyI1NoXQlx+b5hFfjVAFEpZWyAGla1DR7Zn7Tp3G/GPqUEVrJ0SFClBMhVOv40/SwIdTrqLeDcxjStCd/14TDXNdlEHQbsvRd2zfBKoCTnWRKmvx2kmFRP+zy9KzkW6EemJt5zIIgYwirBpX/loDpHzfblaUGL2+WN/0LRD/TInoK2WX33WM+JDgG/XiWyy5h3xgAyAvgx4rLtuYX+m/kgx+p+CxBpZFJ1CZ09ThaPRjsoO6aG+6edEHZTmk9cxjGgXW/ou5wL8XcFt9xwKBYyLR4t+JD+8o9kxZdc+ZJsi0QJq6gw5NqfiDB6OKWYcYdpXvIrOa+mpc2RDa/7Ra4RVg1tLsRQ4+IxJ6gQRm1T3ydkW71UKcW9kYvSyhPWpZYg5GkjZI5YGRl9e4Y8ujk="
+echo ""
+garis
+echo -e "Example config TCP_SSL 8443"
+garis
+echo ""
+
+echo -e "EMzhKvWX2V7h3pHP5ez/k2i1XMhdPh6WVetdSik3kr0f3ynS23Mmfh5NGzbqCme3KqV+1w0AXMwr5G4BL79FI2WDZ+hGmIaghQ+vzEkFlE4lgn3fP5qzJ7k5CTitksAnO3YWNDx1IdvPtwgn/2YEOlBKE4UmV7LMFlg+mWOqWIkFSbK9j2tIqFlAzJDLw+U7IKlPt5AZt/JAolrw9HEv5NN2892l9HwnK2MZcf8AfwCHhcOJLsiOJZOTCP+ywEz2iGXzg40aIdHpcAXJP6Zk+yWj23km5S9yUjq04enD6n2gVkYuA0dNgrprDnWwSH9VgNHyDBbBtwUTsSo7kWbrXgJhk+YS3Hr3I0sCHet6wNGwcEIBdrFqMEyJOd3pFZiO9TBR0xKn76P4A85WjbttuqeXrOAGb50U4Ru/5PKB8C8111w8fd7Djdl+w+DcUjLIEv/t38zX1QAhuE2IvIG3KJTSNFFYVoyvqYbbLCZSBw1f6neAdkYwUffzMVmcagTHqHvHrHWUBgCxH2g1cdhGxKDfoztC0J4mLde64nh+f9Yb9+8YuudG9W69+mhVxhoVSxJZrJ4yNq4JJ48sDjOgYCOXbwZdfuwLs+Y5wjqLqxa9YxXRrJoVIA=="
+garis
+echo -e "${GREEN}| \E[44;1;39m            FAHRI AUTOSCRIPT              \E[0m|"
+garis
+
+}
+
+
+function delete(){
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S DELETE°         \E[0m|"
+garis
+read -p "username : " user
+
+noobzvpns --remove-user $user
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S DELETED!°       \E[0m|"
+garis
+echo "USERNAME: $user"
+echo "Delete success!!"
+garis
+echo -e "${GREEN}| \E[44;1;39m             FAHRI AUTOSCRIPT             \E[0m|"
+garis
+}
+
+
+function renew(){
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S RENEW°          \E[0m|"
+garis
+read -p "username: " user
+read -p "expired: " exp
+noobzvpns --renew-user $user --expired-user $user $exp
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S RENEW!°         \E[0m|"
+garis
+echo "USERNAME: $user"
+echo "renew success!!"
+garis
+echo -e "${GREEN}| \E[44;1;39m             FAHRI AUTOSCRIPT             \E[0m|"
+garis
+}
+
+
+
+
+function lock(){
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S LOCK°           \E[0m|"
+garis
+read -p "username: " user
+noobzvpns --block-user $user
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S LOCK!°          \E[0m|"
+garis
+echo "USERNAME: $user"
+echo "locked success!!"
+garis
+echo -e "${GREEN}| \E[44;1;39m             FAHRI AUTOSCRIPT             \E[0m|"
+garis
+}
+
+
+
+
+
+
+function show(){
+
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S MEMBER!°        \E[0m|"
+garis
+noobzvpns --info-all-user | awk '/^\s*\+.*-> active/ {gsub(/(issued\(yyyymmdd\)|hash_key): [0-9a-f]+/, ""); print; getline; print; getline; getline; getline; print; print "═══════════════════"}'
+
+garis
+echo -e "${GREEN}| \E[44;1;39m             FAHRI AUTOSCRIPT             \E[0m|"
+garis
+}
+
+
+
+function unlock(){
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S UNLOCK°         \E[0m|"
+garis
+read -p "username: " user
+noobzvpns --unblock-user $user
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S UNLOCK!°        \E[0m|"
+garis
+echo "USERNAME: $user"
+echo "unlocked success!!"
+garis
+echo -e "${GREEN}| \E[44;1;39m             FAHRI AUTOSCRIPT             \E[0m|"
+garis
+}
+
+
+
+function remove(){
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S UNLOCK°         \E[0m|"
+garis
+
+read -p "Apakah Anda ingin menghapus semua user? (Y/N): " choice
+
+if [ "$choice" == "Y" ] || [ "$choice" == "y" ]; then
+    # Eksekusi perintah di sini
+    echo "MENGHAPUS SEMUA USER!"
+noobzvpns --remove-all-user
+elif [ "$choice" == "N" ] || [ "$choice" == "n" ]; then
+    echo "Membatalkan penghapusan."
+menu-noobzvpns
+else
+    echo "Pilihan tidak valid."
+fi
+
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S UNLOCK!°         \E[0m|"
+garis
+echo "USERNAME: $user"
+echo "unlocked success!!"
+garis
+echo -e "${GREEN}| \E[44;1;39m             FAHRI AUTOSCRIPT             \E[0m|"
+garis
+}
+
+
+
+
+clear
+garis
+echo -e "${GREEN}| \E[44;1;39m      °NOOBZVPN'S SERVICE°        \E[0m|"
+garis
+
+
+echo -e "${LIGHT}"
+echo -e "01.MENU CREATE ACCOUNT NOOBZVPNS"
+echo -e "02.MENU DELETE ACCOUNT NOOBZVPNS"
+echo -e "03.MENU RENEW ACCOUNT NOOBZVPNS"
+echo -e "04.MENU LOCK ACCOUNT NOOBZVPNS"
+echo -e "05.MENU UNLOCK ACCOUNT NOOBZVPNS"
+echo -e "06.MENU SHOW ALL USER NOOBZVPNS"
+echo -e "07.MENU REMOVE ALL USER NOOBZVPNS"
+echo -e "00. BACK TO MAIN MENU"
+garis
+echo -e "${GREEN}| \E[44;1;39m            FAHRI AUTOSCRIPT              \E[0m|"
+garis
+echo -e ""
+echo
+read -p " Select menu : " opt
+echo -e ""
+case $opt in
+01 | 1) clear ; create ;;
+02 | 2) clear ; delete ;;
+03 | 3) clear ; renew ;;
+04 | 4) clear ; lock ;;
+05 | 5) clear ; unlock ;;
+06 | 6) clear ; show ;;
+07 | 7) clear ; remove ;;
+00 | 0) clear ; menu ;;
+*) clear ; menu ;;
+esac

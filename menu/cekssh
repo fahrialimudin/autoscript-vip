@@ -1,0 +1,84 @@
+#!/bin/bash
+# Color
+y='\033[1;33m'
+f="\033[1;97;41m"
+y='\033[1;33m' #yellow
+UK="\033[0;34m"
+WHITE="\033[1;37m"
+RED="\e[91;1m"
+GREEN='\033[0;32m'
+NC='\033[0m'
+red() { echo -e "\\033[32;1m${*}\\033[0m"; }
+clear
+echo " "
+echo " "
+systemctl reload ssh
+if [ -e "/var/log/auth.log" ]; then
+        LOG="/var/log/auth.log";
+fi
+if [ -e "/var/log/secure" ]; then
+        LOG="/var/log/secure.log";
+fi
+                
+data=( `ps aux | grep -i dropbear | awk '{print $2}'`);
+echo -e "${UK}┌──────────────────────────────────────────┐${NC}"
+echo -e "  ${WHITE}        Memeriksa login Dropbear ${NC}"
+echo -e "${UK}└──────────────────────────────────────────┘${NC}"
+
+cat $LOG | grep -i dropbear | grep -i "Password auth succeeded" > /tmp/login-db.txt;
+for PID in "${data[@]}"
+do
+            cat /tmp/login-db.txt | grep "dropbear\[$PID\]" > /tmp/login-db-pid.txt;
+            NUM=`cat /tmp/login-db-pid.txt | wc -l`;
+            USER=`cat /tmp/login-db-pid.txt | awk -F"for " '{print $2}' | awk '{print $1}'`;
+            IP=`cat /tmp/login-db-pid.txt | awk -F"for " '{print $2}' | awk '{print $3}'`;
+            if [ $NUM -eq 1 ]; then
+                    echo -e "${WHITE}$PID - $USER - $IP${NC}";
+                    fi
+done
+echo -e "${UK}└──────────────────────────────────────────┘${NC}"
+echo " "
+echo -e "${UK}┌──────────────────────────────────────────┐${NC}"
+echo -e "  ${WHITE}        Memeriksa login OpenSSH ${NC}"
+echo -e "${UK}└──────────────────────────────────────────┘${NC}"
+
+cat $LOG | grep -i sshd | grep -i "Accepted password for" > /tmp/login-db.txt
+data=( `ps aux | grep "\[priv\]" | sort -k 72 | awk '{print $2}'`);
+
+for PID in "${data[@]}"
+do
+            cat /tmp/login-db.txt | grep "sshd\[$PID\]" > /tmp/login-db-pid.txt;
+            NUM=`cat /tmp/login-db-pid.txt | wc -l`;
+            USER=`cat /tmp/login-db-pid.txt | awk -F"for " '{print $2}' | awk '{print $1}'`;
+            IP=`cat /tmp/login-db-pid.txt | awk -F"for " '{print $2}' | awk '{print $3}'`;
+            if [ $NUM -eq 1 ]; then
+                    echo -e "${WHITE}$PID - $USER - $IP${NC}";
+        fi
+done
+echo -e "${UK}└──────────────────────────────────────────┘${NC}"
+if [ -f "/etc/openvpn/server/openvpn-tcp.log" ]; then
+echo ""
+echo -e "${UK}┌──────────────────────────────────────────┐${NC}"
+echo -e "  ${WHITE}  Username  |  IP Address  |  Connected ${NC}"
+echo -e "${UK}└──────────────────────────────────────────┘${NC}"
+            cat /etc/openvpn/server/openvpn-tcp.log | grep -w "^CLIENT_LIST" | cut -d ',' -f 2,3,8 | sed -e 's/,/      /g' > /tmp/vpn-login-tcp.txt
+            cat /tmp/vpn-login-tcp.txt
+fi
+echo -e "${UK}└──────────────────────────────────────────┘${NC}"
+
+if [ -f "/etc/openvpn/server/openvpn-udp.log" ]; then
+echo " "
+echo -e "${UK}┌──────────────────────────────────────────┐${NC}"
+echo -e "    ${WHITE}sername  |  IP Address  |  Connected ${NC}"
+echo -e "${UK}└──────────────────────────────────────────┘${NC}"
+            cat /etc/openvpn/server/openvpn-udp.log | grep -w "^CLIENT_LIST" | cut -d ',' -f 2,3,8 | sed -e 's/,/      /g' > /tmp/vpn-login-udp.txt
+            cat /tmp/vpn-login-udp.txt
+fi
+echo -e "${UK}└──────────────────────────────────────────┘${NC}"
+echo "";
+echo -e "\033[0;33m┌──────────────────────────────────────────┐\033[0m"
+echo -e " Autoscript by Fahri Alimudin 082328013583 082328013583     "
+echo -e "\033[0;33m└──────────────────────────────────────────┘\033[0m"
+echo ""
+read -n 1 -s -r -p "Press any key to back on menu"
+menu

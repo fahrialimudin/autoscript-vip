@@ -1,0 +1,164 @@
+#!/bin/bash
+
+REDBG="\033[41m"      # Latar belakang merah
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" # Teks putih tebal
+NC="\033[0m"          # Reset warna
+GREEN="\033[96;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+FONT="\033[0m"
+GREENBG="\033[42;37m"
+nama=$(cat /etc/xray/username)
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+garis(){
+echo -e "\033[0;34m  ────────────────────────────────────────────────"
+}
+garis_bawah(){
+echo -e "\033[0;34m  └──────────────────────────────────────────────┘"
+}
+garis_atas(){
+echo -e "\033[0;34m  ┌──────────────────────────────────────────────┐"
+}
+garis_tebal(){
+echo -e "\033[0;34m  ════════════════════════════════════════════════"
+}
+
+center() {
+    BOX_WIDTH=48
+    TEXT="$1"
+    TEXT_LENGTH=${#TEXT}
+    TEXT_CLEAN=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    TEXT_LENGTH=${#TEXT_CLEAN}
+    # Hitung padding
+    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+
+    # Cetak dengan warna menggunakan printf
+    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
+}
+
+function Sc_Credit(){
+BOX_WIDTH=48
+TEXT="SCRIPT BY FAHRI ALIMUDIN 082328013583 082328013583 "
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+echo -e "\033[0;32m  ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+echo -e "\033[0;32m  ════════════════════════════════════════════════"
+read -p "Tekan Enter untuk kembali ke menu..."
+m-sshws
+}
+function Fahri_Banner() {
+clear
+BOX_WIDTH=48
+TEXT="[ USER LOGIN UDP ]"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+echo -e "\033[0;32m   ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+echo -e "\033[0;32m   ════════════════════════════════════════════════"
+}
+clear
+clear
+echo " "
+echo " "
+sed -i "d" /var/log/udp.log 
+sed -i "d" /tmp/login-udp-db1.txt
+journalctl -u udp-custom -n 500 > /var/log/udp.log
+cat /var/log/udp.log | grep -i "Client connected" > /tmp/login-udp.txt;
+cat /var/log/udp.log | grep -i "Client disconnected" | awk '{print $14}' | cut -d ":" -f 2 > /tmp/login-udp1.txt;
+data=(`cat /tmp/login-udp.txt | awk '{print $9}' | cut -d ":" -f 3 | cut -d "]" -f 1`)
+for akun in "${data[@]}"
+do
+            cat /tmp/login-udp.txt | grep -wE "$akun" | awk '{print $9" "$10}'> /tmp/login-udp-db.txt;
+            IP=`cat /tmp/login-udp-db.txt | awk '{print $1}' | cut -d ":" -f 2`;
+            USER=`cat /tmp/login-udp-db.txt | awk '{print $2}' | cut -d ":" -f 2 | cut -d "]" -f 1`;
+                    echo "$USER $IP"  >> /tmp/login-udp-db1.txt;
+done
+sed -i '/^[[:digit:]]/d' /tmp/login-udp-db1.txt
+sed -i '/[[:digit:]]$/!d' /tmp/login-udp-db1.txtt
+sed -i "d" /tmp/login-udp-fix.txt
+cat /tmp/login-udp-db1.txt | sort | uniq > /tmp/login-udp-fix.txt
+clear
+data3=(`cat /tmp/login-udp-fix.txt | awk '{print $2}'`)
+Fahri_Banner
+garis_atas
+for akun in "${data3[@]}"
+do
+ipon=$(cat /tmp/login-udp.txt | grep -wE "$akun" | wc -l)
+ipof=$(cat /tmp/login-udp1.txt | grep -wE "$akun" | wc -l)
+let jum=(${ipon}-${ipof})
+if [[ $jum -gt "0" ]]; then
+ USER=`cat /tmp/login-udp-fix.txt | grep -wE "$akun" | awk '{print $1}' | uniq`;
+ IP=`cat /tmp/login-udp-fix.txt | grep -wE "$akun" | awk '{print $2}' | uniq`;
+printf "  %-13s %-7s %-8s %2s\n" "Aktif" "$USER" "$IP"
+else
+echo -ne
+fi
+done
+garis_bawah
+Sc_Credit

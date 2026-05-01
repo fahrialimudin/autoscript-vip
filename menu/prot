@@ -1,0 +1,35 @@
+#!/bin/bash
+RED="\033[31m"
+YELLOW="\033[33m"
+NC='\e[0m'
+GREEN='\033[0;32m'
+ORANGE='\033[33m'
+NCA='\033[00m'
+clear
+echo -e " ${ORANGE} ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓${NC}"
+echo -e "   \e[1;97;101m          » INFORMATION PORT SERVICE «          ${NCA}"
+echo -e " ${ORANGE} ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${NC}"
+echo -e " ${ORANGE} ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓${NC}"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}OpenSSH direct             : ${GREEN}22, 2222, 2223       ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}SSH WebSocket Non TLS      : ${GREEN}80, 55, 8880, 2082  ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}SSH WebSocket TLS          : ${GREEN}443, 8443, 2087, 2096${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}Dropbear direct           : ${GREEN}109, 143             ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}OpenVPN TCP direct        : ${GREEN}1194                 ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}OpenVPN UDP direct        : ${GREEN}2200                 ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}OpenVPN SSL / WS-SSL      : ${GREEN}443                  ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}OVPN config download      : ${GREEN}81                   ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}NoobzVPN TCP/SSL          : ${GREEN}8080, 7443           ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}SlowDNS UDP server        : ${GREEN}53 -> 5300           ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}SlowDNS client tunnel     : ${GREEN}88                   ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}Xray WS Non TLS           : ${GREEN}80, 55, 8880, 2082  ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}Xray WS TLS / gRPC        : ${GREEN}443, 8443, 2087, 2096${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}BadVPN / UDP mini         : ${GREEN}7100, 7200, 7300    ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}Backend local Xray        : ${GREEN}10001-10008          ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}Backend local Nginx       : ${GREEN}1010, 1012, 1013    ${ORANGE}│"
+echo -e " ${ORANGE} │  ${GREEN}» ${NC}Backend local WS-ePro     : ${GREEN}10012, 10015         ${ORANGE}│"
+echo -e " ${ORANGE} │ ${ORANGE}                                               │"
+echo -e " ${ORANGE} │  \e[1;97;101m✶ Install by Fahri Alimudin 082328013583 ✶ ${NC}       ${ORANGE}│"
+echo -e " ${ORANGE} ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${NC}"
+echo ""
+read -n 1 -s -r -p "  Press Any Key To Back On Menu"
+menu

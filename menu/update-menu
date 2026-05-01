@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+BASE="${REPO:-https://raw.githubusercontent.com/fahrialimudin/autoscript-vip/main/}"
+clear
+echo -e "\033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e "        UPDATE MENU AUTOSCRIPT"
+echo -e "\033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+MENU_FILES="addhost addss addssh addtr addvless addws asu autobackup autokill autoreboot backup bw ceklim cekss cekssh cektr cekvless cekws change-color clearcache clearlog delexp delss delssh deltr delvless delws fixcert kacuk kontol limitspeed lock m-noob m-sshws m-ssws m-system m-trojan m-vless m-vmess member menu menu-backup prot renewss renewssh renewtr renewvless renewws restart restore run sdo speedtest tendang trial trialss trialtr trialvless trialws udepe unlock update-menu xp"
+for file in $MENU_FILES; do
+    if command -v wget >/dev/null 2>&1; then
+        wget -q "${BASE}menu/$file" -O "/usr/local/sbin/$file"
+    else
+        curl -fsSL "${BASE}menu/$file" -o "/usr/local/sbin/$file"
+    fi
+    chmod +x "/usr/local/sbin/$file"
+done
+echo -e "\033[1;32mUpdate menu selesai.\033[0m"
+sleep 1
+menu
