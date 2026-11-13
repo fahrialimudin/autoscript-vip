@@ -1,0 +1,223 @@
+#!/bin/bash
+# COLOR VALIDATION
+clear
+y='\033[1;33m' #yellow
+BGX="\033[42m"
+CYAN="\033[0;36m"
+z="\033[95;1m"
+f="\033[1;97;41m"
+G="\033[92m"
+RED='\033[0;31m'
+NC='\033[0;34m'
+gray="\e[1;30m"
+Blue="\033[0;34m"
+blue="\033[0;34m"
+green='\033[0;32m'
+grenbo="\e[92;1m"
+purple="\033[1;95m"
+GREEN='\033[0;32m'
+YELL='\033[0;32m'
+CY='\033[0;34m'
+p='\033[0;37m'
+LIGHT='\033[0;37m'
+RESET='\033[0m'
+hijau="[92m"
+
+# Custom warna menu utama - dibuat oleh menu COLOUR
+COLOR_CONF="/etc/autoscript-vip/menu-color.conf"
+if [ -f "$COLOR_CONF" ]; then
+    . "$COLOR_CONF"
+fi
+clear
+# underline
+UPU='\033[5;35m'
+UCY='\033[5;36m'
+UWH='\033[5;37m'
+IPVPS=$(curl -s ipv4.icanhazip.com)
+domain=$(cat /etc/xray/domain)
+LOADCPU=$(printf '%-0.00001s' "$(top -bn1 | awk '/Cpu/ { cpu = "" 100 - $8 "%" }; END { print cpu }')")
+MODEL=$(cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')
+CORE=$(printf '%-1s' "$(grep -c cpu[0-9] /proc/stat)")
+DATEVPS=$(date +'%d-%m-%Y')
+TIMEZONE=$(printf '%(%H-%M-%S)T')
+SERONLINE=$(uptime -p | cut -d " " -f 2-10000)
+#ISP=$(curl -s ipinfo.io/org | cut -d " " -f 2-10)
+clear
+MYIP=$(curl -sS ipv4.icanhazip.com)
+echo ""
+clear
+clear
+
+tram=$( free -m | awk 'NR==2 {print $2}' )
+uram=$( free -m | awk 'NR==2 {print $3}' )
+clear
+is_active() { systemctl is-active --quiet "$1" 2>/dev/null; }
+status_on_error() { if is_active "$1"; then echo "${green}ON"; else echo "${RED}ERROR"; fi; }
+status_any_on_error() {
+    for svc in "$@"; do
+        if is_active "$svc"; then echo "${green}ON"; return; fi
+    done
+    echo "${RED}ERROR"
+}
+
+status_ssh=$(status_any_on_error ssh sshd)
+status_dropbear=$(status_on_error dropbear)
+status_haproxy=$(status_on_error haproxy)
+status_xray=$(status_on_error xray)
+status_nginx=$(status_on_error nginx)
+status_ws_epro=$(status_on_error ws)
+status_udp=$(status_on_error udp-custom)
+noobz=$(status_on_error noobzvpns)
+#
+# //
+# // Log account
+vlx=$(grep -c -E "^#& " "/etc/xray/config.json")
+let vla=$vlx/2
+vmc=$(grep -c -E "^### " "/etc/xray/config.json")
+let vma=$vmc/2
+ssh1="$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)"
+trx=$(grep -c -E "^#! " "/etc/xray/config.json")
+let trb=$trx/2
+ssx=$(grep -c -E "^#!# " "/etc/xray/config.json")
+let ssa=$ssx/2
+# //
+
+clear
+clear
+echo -e ""
+echo -e "\E[44;1;39m ꧁࿇ SCRIPT SEDERHANA PENUH CINTA ࿇꧂ \E[0m"
+echo -e ""                       
+echo -e " ${NC} ╭════════════════════════════════════════════════════════════╮"
+echo -e " ${NC} │\e[1;97;101m     Welcome to Autoscript Multiport by Fahri Alimudin      \e[0m${NC}│"
+echo -e " ${NC} ╰════════════════════════════════════════════════════════════╯"
+echo -e " ${NC} ╭════════════════════════════════════════════════════════════╮"
+#echo -e " ${NC} │$RED ● ${CYAN}SERVER VPS ${YELL}  = \033[0;37m$ISP ${NC}"
+echo -e " ${NC} │$RED ● ${CYAN}SYSTEM OS ${YELL}   = \033[0;37m$MODEL${NC}"
+echo -e " ${NC} │$RED ● ${CYAN}SYSTEM CORE ${YELL} = \033[0;37m$CORE${NC}"
+echo -e " ${NC} │$RED ● ${CYAN}SERVER RAM ${YELL}  = \033[0;37m$tram / $uram MB $NC"
+echo -e " ${NC} │$RED ● ${CYAN}LOADCPU ${YELL}     = \033[0;37m$LOADCPU ℅$NC"
+echo -e " ${NC} │$RED ● ${CYAN}DATE ${YELL}        = \033[0;37m$DATEVPS${NC}"
+echo -e " ${NC} │$RED ● ${CYAN}TIME ${YELL}        = \033[0;37m$TIMEZONE${NC}"
+echo -e " ${NC} │$RED ● ${CYAN}UPTIME ${YELL}      = \033[0;37m$SERONLINE${NC}"
+echo -e " ${NC} │$RED ● ${CYAN}IP VPS ${YELL}      = \033[0;37m$IPVPS${NC}"
+echo -e " ${NC} │$RED ● ${CYAN}DOMAIN ${YELL}      = \033[0;37m$domain${NC}"
+echo -e " ${NC} ╰════════════════════════════════════════════════════════════╯$NC"
+echo -e " \033[0;37m                  >>> INFORMATION ACCOUNT <<< "
+echo -e " ${NC}         ═════════════════════════════════════════════${NC}" 
+echo -e "               ${green} SSH/OPENVPN/UDP  $YELL=\033[0;37m $ssh1  ${YELL}$a"
+echo -e "               ${green} VMESS/WS/GRPC    $YELL=\033[0;37m $vma  ${YELL}$a"
+echo -e "               ${green} VLESS/WS/GRPC    $YELL=\033[0;37m $vla  ${YELL}$a"
+echo -e "               ${green} TROJAN/WS/GRPC   $YELL=\033[0;37m $trb  ${YELL}$a"
+echo -e "               ${green} SHADOW/WS/GRPC   $YELL=\033[0;37m $ssa  ${YELL}$a"
+echo -e " ${NC}         ═════════════════════════════════════════════${NC}" 
+echo -e " ${p}        >>> install via github.com/fahrialimudin <<<${RESET}"
+echo -e " ${NC} ╭═══════════════════╮╭═══════════════════╮╭══════════════════╮$NC"
+echo -e " ${NC} │${p} SSH     $status_ssh   ${p}  NOOBZVPN   $noobz ${p}    NGINX $status_nginx ${p}    HAPROXY  $status_haproxy    ${NC}"
+echo -e " ${NC} │${p} WS-ePro $status_ws_epro    ${p} UDP CUSTOM $status_udp ${p}    XRAY  $status_xray ${p}    DROPBEAR $status_dropbear    ${NC}"
+echo -e " ${NC} ╰═══════════════════╯╰═══════════════════╯╰══════════════════╯$NC"
+echo -e " ${NC} ╭════════════════════════════════════════════════════════════╮"
+printf " ${NC} │ %b%-18s${NC}│ %b%-18s${NC}│ %b%-19s${NC}│\n" "$p" "[01] SSH MENU"      "$p" "[08] BCKP/RSTR"    "$p" "[16] CHANGE DOMAIN"
+printf " ${NC} │ %b%-18s${NC}│ %b%-18s${NC}│ %b%-19s${NC}│\n" "$p" "[02] VMESS MENU"    "$p" "[09] GOTOP X RAM"  "$p" "[17] FIX CRT DOMAIN"
+printf " ${NC} │ %b%-18s${NC}│ %b%-18s${NC}│ %b%-19s${NC}│\n" "$p" "[03] VLESS MENU"    "$p" "[10] RESTART ALL"  "$p" "[18] CHANGE BANNER"
+printf " ${NC} │ %b%-18s${NC}│ %b%-18s${NC}│ %b%-19s${NC}│\n" "$p" "[04] TROJAN MENU"   "$p" "[11] COLOUR"       "$p" "[19] RESTART BANNER"
+printf " ${NC} │ %b%-18s${NC}│ %b%-18s${NC}│ %b%-19s${NC}│\n" "$p" "[05] AKUN NOOBZVPN" "$p" "[12] UPDATE MENU"  "$p" "[20] SPEEDTEST"
+printf " ${NC} │ %b%-18s${NC}│ %b%-18s${NC}│ %b%-19s${NC}│\n" "$p" "[06] SS - LIBEV"    "$p" "[13] RUNNING"      "$p" "[21] EKSTRAK MENU"
+printf " ${NC} │ %b%-18s${NC}│ %b%-18s${NC}│ %b%-19s${NC}│\n" "$p" "[07] INSTALL UDP"   "$p" "[14] INFO PORT"    "$p" ""
+echo -e " ${NC} ╰════════════════════════════════════════════════════════════╯"
+echo -e " ${NC} ╭════════════════════════════════════════════════════════════╮"
+echo -e " ${NC} │\033[0;37m Script Version $YELL= \033[0;37m LIFETIME - Fahri Alimudin 082328013583 "
+echo -e " ${NC} ╰════════════════════════════════════════════════════════════╯\033[0;37m"
+echo -e " "
+read -p "  Options [ 1 - 21 ] ❱❱❱ " opt
+echo -e ""
+case $opt in
+1 | 01)
+clear
+m-sshws
+;;
+2 | 02)
+clear
+m-vmess
+;;
+3 | 03)
+clear
+m-vless
+;;
+4 | 04)
+clear
+m-trojan
+;;
+5 | 05)
+clear
+m-noob
+;;
+6 | 06)
+clear
+m-ssws
+;;
+7 | 07)
+clear
+udepe
+;;
+8 | 08)
+clear
+menu-backup
+;;
+9 | 09)
+clear
+gotop
+;;
+10)
+clear
+restart
+;;
+11)
+clear
+change-color
+;;
+12)
+clear
+update-menu
+;;
+13)
+clear
+run
+;;
+14)
+clear
+prot
+;;
+16)
+clear
+addhost
+;;
+17)
+clear
+fixcert
+;;
+18)
+clear
+nano /etc/issue.net
+;;
+19)
+clear
+/etc/init.d/dropbear restart
+;;
+20)
+clear
+speedtest
+;;
+21)
+clear
+m-system
+;;
+0 | 00)
+exit
+;;
+x)
+menu
+;;
+*) clear ;
+menu
+;;
+esac

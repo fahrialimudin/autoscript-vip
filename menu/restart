@@ -1,0 +1,27 @@
+#!/bin/bash
+RED='\033[0;31m'
+NC='\033[0m'
+GREEN='\033[0;32m'
+clear
+echo -e ""
+echo -e " ${GREEN} Starting Restart All Service ${NC}"
+sleep 2
+systemctl daemon-reload >/dev/null 2>&1 || true
+systemctl restart ws >/dev/null 2>&1 || true
+systemctl restart haproxy >/dev/null 2>&1 || true
+systemctl restart xray >/dev/null 2>&1 || true
+systemctl restart openvpn-server@server-tcp openvpn-server@server-udp >/dev/null 2>&1 || systemctl restart openvpn >/dev/null 2>&1 || true
+systemctl restart ssh >/dev/null 2>&1 || /etc/init.d/ssh restart || true
+systemctl restart dropbear >/dev/null 2>&1 || /etc/init.d/dropbear restart || true
+systemctl restart nginx >/dev/null 2>&1 || /etc/init.d/nginx restart || true
+systemctl restart cron >/dev/null 2>&1 || true
+systemctl enable --now netfilter-persistent rc-local >/dev/null 2>&1 || true
+for svc in udp-mini-1 udp-mini-2 udp-mini-3 udp-custom noobzvpns; do
+    systemctl enable --now "$svc" >/dev/null 2>&1 || true
+done
+netfilter-persistent save >/dev/null 2>&1 || true
+netfilter-persistent reload >/dev/null 2>&1 || true
+echo ""
+echo -e " ${GREEN} Back to menu in 2 sec ${NC}"
+sleep 2
+menu

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+NC='\033[0;37m'
+COLOR1='\033[0;34m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BICyan='\033[0;34m' 
+BIWhite='\033[1;97m'  
+red() { echo -e "\\033[31;1m${*}\\033[0m"; }
+clear
+clear
+
+clear
+echo -e "${BICyan}┌─────────────────────────────────────────────────┐${NC}"
+echo -e "${BICyan}│\e[1;97;101m                   VLESS MENU                    ${BICyan}│$NC"
+echo -e "${BICyan}└─────────────────────────────────────────────────┘${NC}"
+echo -e " ${BICyan}┌───────────────────────────────────────────────┐${NC}"
+echo -e "     ${COLOR1}[${BIWhite}1${COLOR1}] ${NC}Create Vless Account     "
+echo -e "     ${COLOR1}[${BIWhite}2${COLOR1}] ${NC}Trial Vless Acoount     "
+echo -e "     ${COLOR1}[${BIWhite}3${COLOR1}] ${NC}Delete Account Vless     "
+echo -e "     ${COLOR1}[${BIWhite}4${COLOR1}] ${NC}Renew Account Vless     "
+echo -e "     ${COLOR1}[${BIWhite}5${COLOR1}] ${NC}Cek User Login Account Vless     "
+echo -e "     ${COLOR1}[${BIWhite}0${COLOR1}] ${NC}Back To Menu     "
+echo -e " "
+echo -e "     \e[1;97;101m✶ Install by Fahri Alimudin 082328013583 082328013583 ✶ ${NC} "
+echo -e " ${BICyan}└──────────────────────────────────────────────┘${NC}"
+echo ""
+read -p " Select menu : " opt
+echo -e ""
+case $opt in
+1) clear ; addvless ;;
+2) clear ; trialvless ;;
+3) clear ; delvless ;;
+4) clear ; renewvless ;;
+5) clear ; cekvless ;;
+0) clear ; menu ;;
+x) exit ;;
+*) echo -e "" ; echo "Press any key to back on menu" ; sleep 1 ; menu ;;
+esac
