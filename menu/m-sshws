@@ -1,0 +1,53 @@
+#!/bin/bash
+NC='\033[0;37m' 
+PURPLE='\033[0;34m' 
+GREEN='\033[0;32m' 
+BIWhite='\033[1;97m' 
+asu='\033[1;33m' 
+RED="\033[31m"
+YELLOW="\033[33m"
+NC='\e[0m'
+YELL='\033[0;33m'
+BRED='\033[1;31m'
+ORANGE='\033[33m'
+BGWHITE='\e[0;100;37m'
+clear
+
+clear
+echo -e "${PURPLE}┌─────────────────────────────────────────────────┐${NC}"
+echo -e " \e[1;97;101m                    SSH MENU                     ${PURPLE}│$NC"
+echo -e "${PURPLE}└─────────────────────────────────────────────────┘${NC}"
+echo -e "${PURPLE}┌───────────────────────────────────────────────┐${NC}"
+echo -e "     ${asu}[${BIWhite}1${asu}]${NC}  Create Ssh Account "
+echo -e "     ${asu}[${BIWhite}2${asu}]${NC}  Trial Ssh Acoount  "
+echo -e "     ${asu}[${BIWhite}3${asu}]${NC}  Delete Ssh Acoount  "
+echo -e "     ${asu}[${BIWhite}4${asu}]${NC}  Perpanjang Ssh Account  "
+echo -e "     ${asu}[${BIWhite}5${asu}]${NC}  Cek User Login Ssh-Ws"
+echo -e "     ${asu}[${BIWhite}6${asu}]${NC}  Cek User Login UDP "
+echo -e "     ${asu}[${BIWhite}7${asu}]${NC}  Cek User Multi Log "
+echo -e "     ${asu}[${BIWhite}8${asu}]${NC}  Auto Del User Exp  "
+echo -e "     ${asu}[${BIWhite}9${asu}]${NC}  Auto Kill User Ssh "
+echo -e "     ${asu}[${BIWhite}10${asu}]${NC} Cek All Member Ssh "
+echo -e "     ${asu}[${BIWhite}11${asu}]${NC} Tendang User Multi"
+echo -e "     ${asu}[${BIWhite}0${asu}]${NC}  Back To Menu      "
+echo -e " "
+echo -e "     \e[1;97;101m✶ Install by Fahri Alimudin 082328013583 082328013583 ✶ ${NC} "
+echo -e "${PURPLE}└───────────────────────────────────────────────┘${NC}"
+echo ""
+read -p " Select menu : " opt
+echo -e ""
+case $opt in
+1) clear ; addssh ;;
+2) clear ; trial ;;
+3) clear ; delssh ;;
+4) clear ; renewssh;;
+5) clear ; cekssh ;;
+6) clear ; kacuk ;;
+7) clear ; ceklim ;;
+8) clear ; delexp ;;
+9) clear ; autokill ;;
+10) clear ; member ;;
+11) clear ; tendang ;;
+0) clear ; menu ;;
+*) echo -e "" ; echo "Press any key to back on menu" ; sleep 1 ; menu ;;
+esac
