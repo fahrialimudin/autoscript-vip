@@ -1,0 +1,111 @@
+#!/bin/bash
+REPO="${REPO:-https://raw.githubusercontent.com/fahrialimudin/autoscript-vip/main/}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fetch_asset() {
+    local rel="$1" dst="$2" tmp
+    mkdir -p "$(dirname "$dst")"
+    if [ -s "${SCRIPT_DIR}/${rel#media/}" ]; then
+        cp -f "${SCRIPT_DIR}/${rel#media/}" "$dst" || return 1
+    else
+        tmp=$(mktemp "${dst}.download.XXXXXX") || return 1
+        if ! curl -fsSL --retry 3 "${REPO}${rel}" -o "$tmp" || [ ! -s "$tmp" ]; then
+            rm -f "$tmp"
+            return 1
+        fi
+        mv "$tmp" "$dst"
+    fi
+}
+
+
+fetch_asset "media/limitvmess.service" "/etc/systemd/system/limitvmess.service" && chmod +x /etc/systemd/system/limitvmess.service >/dev/null 2>&1
+fetch_asset "media/limitvless.service" "/etc/systemd/system/limitvless.service" && chmod +x /etc/systemd/system/limitvless.service >/dev/null 2>&1
+fetch_asset "media/limittrojan.service" "/etc/systemd/system/limittrojan.service" && chmod +x /etc/systemd/system/limittrojan.service >/dev/null 2>&1
+fetch_asset "media/limitshadowsocks.service" "/etc/systemd/system/limitshadowsocks.service" && chmod +x /etc/systemd/system/limitshadowsocks.service >/dev/null 2>&1
+fetch_asset "media/vmess" "/etc/xray/limit.vmess" >/dev/null 2>&1
+fetch_asset "media/vless" "/etc/xray/limit.vless" >/dev/null 2>&1
+fetch_asset "media/trojan" "/etc/xray/limit.trojan" >/dev/null 2>&1
+fetch_asset "media/shadowsocks" "/etc/xray/limit.shadowsocks" >/dev/null 2>&1
+chmod +x /etc/xray/limit.vmess
+chmod +x /etc/xray/limit.vless
+chmod +x /etc/xray/limit.trojan
+chmod +x /etc/xray/limit.shadowsocks
+systemctl daemon-reload
+systemctl enable --now limitvmess
+systemctl enable --now limitvless
+systemctl enable --now limittrojan
+systemctl enable --now limitshadowsocks
+# systemctl start limitvmess
+# systemctl start limitvless
+# systemctl start limittrojan
+# systemctl start limitshadowsocks
+# systemctl restart limitvmess
+# systemctl restart limitvless
+# systemctl restart limittrojan
+# systemctl restart limitshadowsocks
+
+cd
+fetch_asset "media/limit-ip" "/usr/bin/limit-ip"
+chmod 755 /usr/bin/limit-ip
+cd /usr/bin
+sed -i 's/\r//' limit-ip
+cd
+clear
+# // SERVICE LIMIT IP VMESS
+cat >/etc/systemd/system/vmip.service << EOF
+[Unit]
+Description=My
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+WorkingDirectory=/root
+ExecStart=/bin/bash -c "while true; do /usr/bin/limit-ip vmip; sleep 60; done"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# // SERVICE LIMIT IP VLESS
+cat >/etc/systemd/system/vlip.service << EOF
+[Unit]
+Description=My
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+WorkingDirectory=/root
+ExecStart=/bin/bash -c "while true; do /usr/bin/limit-ip vlip; sleep 60; done"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# // SERVICE LIMIT TROJAN
+cat >/etc/systemd/system/trip.service << EOF
+[Unit]
+Description=My
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+WorkingDirectory=/root
+ExecStart=/bin/bash -c "while true; do /usr/bin/limit-ip trip; sleep 60; done"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl restart vmip
+systemctl enable vmip
+systemctl restart vlip
+systemctl enable vlip
+systemctl restart trip
+systemctl enable trip
+
+rm -rf /root/limmit

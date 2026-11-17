@@ -1,0 +1,12 @@
+[Unit]
+Description=Automatically
+After=network.target
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/mkdir -p /var/run/xray
+ExecStart=/usr/bin/chown www-data:www-data /var/run/xray
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
