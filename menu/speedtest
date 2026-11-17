@@ -1,0 +1,78 @@
+#!/bin/bash
+# Wrapper Speedtest by Ookla untuk menu autoscript.
+# File ini berbentuk shell script, bukan binary, agar aman di Ubuntu 22/24.
+# Saat dijalankan dari menu, lisensi Ookla otomatis diterima via flag resmi.
+
+clear
+SELF="$(readlink -f "$0" 2>/dev/null || echo "$0")"
+
+is_ookla_speedtest() {
+    local bin="$1"
+    [ -x "$bin" ] || return 1
+    [ "$(readlink -f "$bin" 2>/dev/null || echo "$bin")" != "$SELF" ] || return 1
+    "$bin" --version 2>&1 | grep -qi "Ookla"
+}
+
+run_ookla_speedtest() {
+    local bin
+    for bin in /usr/bin/speedtest /usr/local/bin/speedtest /bin/speedtest /snap/bin/speedtest; do
+        if is_ookla_speedtest "$bin"; then
+            "$bin" --accept-license --accept-gdpr
+            return $?
+        fi
+    done
+    return 1
+}
+
+install_ookla_speedtest() {
+    export DEBIAN_FRONTEND=noninteractive
+    echo "Menginstall Speedtest by Ookla..."
+    local log_file=/var/log/autoscript-speedtest-ookla.log
+    local repo_script=/tmp/ookla-speedtest-install.sh
+    : > "$log_file"
+
+    if ! apt-get install -y curl ca-certificates gnupg apt-transport-https >>"$log_file" 2>&1; then
+        tail -n 15 "$log_file"
+        return 1
+    fi
+    apt-get remove --purge -y speedtest-cli >>"$log_file" 2>&1 || true
+    if ! curl --retry 3 --connect-timeout 15 -fsSL \
+        https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh \
+        -o "$repo_script" >>"$log_file" 2>&1; then
+        tail -n 15 "$log_file"
+        return 1
+    fi
+    if ! os=ubuntu dist=jammy bash "$repo_script" >>"$log_file" 2>&1 || \
+       ! apt-get update -y >>"$log_file" 2>&1 || \
+       ! apt-get install -y speedtest >>"$log_file" 2>&1; then
+        echo "Detail kegagalan: $log_file"
+        tail -n 15 "$log_file"
+        return 1
+    fi
+}
+
+# Jalankan langsung jika Ookla CLI sudah ada.
+if run_ookla_speedtest; then
+    echo ""
+    read -n 1 -s -r -p "Tekan tombol apa saja untuk kembali ke menu..."
+    menu
+    exit 0
+fi
+
+install_ookla_speedtest
+clear
+if run_ookla_speedtest; then
+    echo ""
+    read -n 1 -s -r -p "Tekan tombol apa saja untuk kembali ke menu..."
+    menu
+    exit 0
+fi
+
+clear
+echo "Speedtest by Ookla belum berhasil dipasang."
+echo "Silakan jalankan manual:"
+echo "  curl -fsSL https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash"
+echo "  apt-get install -y speedtest"
+echo ""
+read -n 1 -s -r -p "Tekan tombol apa saja untuk kembali ke menu..."
+menu

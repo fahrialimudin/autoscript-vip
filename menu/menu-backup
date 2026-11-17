@@ -1,0 +1,74 @@
+#!/bin/bash
+
+NC='\033[0;37m'
+PURPLE='\033[0;34m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BIWhite='\033[1;97m'  
+red() { echo -e "\\033[31;1m${*}\\033[0m"; }
+clear
+clear
+
+function clean() {
+clear
+#!/bin/bash
+
+clear
+data=(`find /var/log/ -name '*.log'`);
+for log in "${data[@]}"
+do
+echo "$log clear"
+echo > $log
+done
+data=(`find /var/log/ -name '*.err'`);
+for log in "${data[@]}"
+do
+echo "$log clear"
+echo > $log
+done
+data=(`find /var/log/ -name 'mail.*'`);
+for log in "${data[@]}"
+do
+echo "$log clear"
+echo > $log
+done
+echo > /var/log/syslog
+echo > /var/log/btmp
+echo > /var/log/messages
+echo > /var/log/debug
+bcc=`date`
+echo ""
+echo "Successfully clean log at $bcc"
+sleep 0.5
+clear
+echo ""
+
+    read -n 1 -s -r -p "Press any key to back on menu"
+    menu-backup
+    
+}
+clear
+echo -e "$PURPLE┌─────────────────────────────────────────────────┐${NC}"
+echo -e "$PURPLE│\e[1;97;101m               Menu Backup Data                  $PURPLE│$NC"
+echo -e "$PURPLE└─────────────────────────────────────────────────┘${NC}"
+echo -e " $PURPLE┌───────────────────────────────────────────────┐${NC}"
+echo -e "     ${GREEN}[${BIWhite}1${GREEN}] ${NC}Backup Data      "
+echo -e "     ${GREEN}[${BIWhite}2${GREEN}] ${NC}Restore Data     "
+echo -e "     ${GREEN}[${BIWhite}3${GREEN}] ${NC}Auto Backup Data      "
+echo -e "     ${GREEN}[${BIWhite}4${GREEN}] ${NC}Cleaner Data      "
+echo -e "     ${GREEN}[${BIWhite}0${GREEN}] Back To Menu     "
+echo -e " "
+echo -e "     \e[1;97;101m✶ Install by Fahri Alimudin 082328013583 082328013583 ✶ ${NC} "
+echo -e " ${PURPLE}└──────────────────────────────────────────────┘${NC}"
+echo ""
+read -p " Select menu : " opt
+echo -e ""
+case $opt in
+1) clear ; backup ;;
+2) clear ; restore ;;
+3) clear ; autobackup ;;
+4) clear ; clean ;;
+0) clear ; menu ;;
+x) exit ;;
+*) echo -e "" ; echo "Press any key to back on menu" ; sleep 1 ; menu ;;
+esac

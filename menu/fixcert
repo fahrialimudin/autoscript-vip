@@ -1,0 +1,53 @@
+#!/bin/bash
+DF='\e[39m'
+Bold='\e[1m'
+Blink='\e[5m'
+yell='\e[33m'
+red='\e[31m'
+green='\e[32m'
+blue='\e[34m'
+PURPLE='\e[35m'
+cyan='\e[36m'
+Lred='\e[91m'
+Lgreen='\e[92m'
+yellow='\e[93m'
+NC='\e[0m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+LIGHT='\033[0;37m'
+grenbo="\e[92;1m"
+purple() { echo -e "\\033[35;1m${*}\\033[0m"; }
+tyblue() { echo -e "\\033[36;1m${*}\\033[0m"; }
+yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
+green() { echo -e "\\033[32;1m${*}\\033[0m"; }
+red() { echo -e "\\033[31;1m${*}\\033[0m"; }
+clear
+function notif_ssl() {
+    green "Notif AddHost Tele"
+    sleep 2
+URL="$URL"
+TEXT="
+<code>====================</code>
+<code>Notif Pasang SSL    </code>
+<code>====================</code>
+<code>PASANG SSL DONE</code>
+<code>====================</code>
+"
+}
+
+clear
+
+function pasang_ssl() {
+    green "Renew Cert SSL"
+    sleep 2
+    domain=$(cat /etc/xray/domain)
+    if /usr/local/sbin/autoxray-ssl "$domain"; then
+        systemctl restart nginx xray haproxy >/dev/null 2>&1 || true
+    else
+        echo "[ERROR] Gagal memasang SSL. Periksa DNS dan port 80."
+    fi
+}
+pasang_ssl
+notif_ssl
+echo ""
+menu

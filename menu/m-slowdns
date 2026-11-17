@@ -1,0 +1,33 @@
+#!/bin/bash
+# Menu SlowDNS - tambahan untuk mengisi menu 15 yang kosong
+clear
+domain=$(cat /etc/xray/domain 2>/dev/null)
+pubkey=$(cat /etc/slowdns/server.pub 2>/dev/null)
+status_server=$(systemctl is-active server 2>/dev/null)
+status_client=$(systemctl is-active client 2>/dev/null)
+echo -e " ┌──────────────────────────────────────────┐"
+echo -e " │              SLOWDNS MENU                │"
+echo -e " └──────────────────────────────────────────┘"
+echo -e "  Domain NS      : dns.${domain}"
+echo -e "  Domain Utama   : ${domain}"
+echo -e "  Public Key     : ${pubkey}"
+echo -e "  Port Server    : 5300/udp (SlowDNS Server)"
+echo -e "  Port Client    : 127.0.0.1:88 (SlowDNS Client)"
+echo -e "  Status Server  : ${status_server}"
+echo -e "  Status Client  : ${status_client}"
+echo -e " ┌──────────────────────────────────────────┐"
+echo -e " │  [1] Restart SlowDNS Server              │"
+echo -e " │  [2] Restart SlowDNS Client              │"
+echo -e " │  [3] Restart Keduanya                    │"
+echo -e " │  [0] Back To Menu                        │"
+echo -e " │  [x] Exit                                │"
+echo -e " └──────────────────────────────────────────┘"
+read -p "  Options [ 0 - 3 ] ❱❱❱ " opt
+case $opt in
+1) systemctl restart server; echo "SlowDNS Server: $(systemctl is-active server)"; sleep 2; m-slowdns ;;
+2) systemctl restart client; echo "SlowDNS Client: $(systemctl is-active client)"; sleep 2; m-slowdns ;;
+3) systemctl restart server client; echo "Server: $(systemctl is-active server) / Client: $(systemctl is-active client)"; sleep 2; m-slowdns ;;
+0) clear ; menu ;;
+x) exit ;;
+*) m-slowdns ;;
+esac
